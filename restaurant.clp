@@ -28,6 +28,14 @@
 	=>
 	(assert (grade-restaurant ?X wifi)))
 
+(defrule count-distance
+	(user lat ?ULat)
+	(user lng ?ULng)
+	(restaurant ?X lat ?RLat)
+	(restaurant ?X lng ?RLng)
+	=>
+	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))))
+
 (defrule populate-restaurant
 	?f <- (init restaurant)
 	=>
