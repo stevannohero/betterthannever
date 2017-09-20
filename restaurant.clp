@@ -1,6 +1,7 @@
 (defrule populate-restaurant
-	(init restaurant)
+	?f <- (init restaurant)
 	=>
+	(retract ?f)
 	(assert
 		(restaurant A smooker)
 		(restaurant A minBudget 1000)
@@ -27,8 +28,9 @@
 
 // just dummy data, use stdin to populate this
 (defrule populate-user
-	(init user)
+	?f <- (init user)
 	=>
+	(retract ?f)
 	(assert 
 		(user smooking true)
 		(user minBudget 1300)
@@ -40,8 +42,9 @@
 	))
 
 (defrule init
-	(initial-fact)
+	?f <- (initial-fact)
 	=>
+	(retract ?f)
 	(printout t "Initializing program" crlf)
 	(assert
 		(init restaurant)
