@@ -1,17 +1,11 @@
-(defrule grade-smooke-value
-	(user smooking true)
-	(restaurant ?X smooke true)
-	=>
-	(assert (grade-restaurant ?X smooke)))
-
-(defrule grade-nonsmooke-value
-	(user smooking false|unknown)
-	(restaurant ?X smooke false)
+(defrule grade-smooke
+	(user smooking ?Y)
+	(restaurant ?X smooke ?Y)
 	=>
 	(assert (grade-restaurant ?X smooke)))
 
 // what is user min budget mean?
-(defrule grade-budget-known
+(defrule grade-budget
 	(user minBudget ?UMin)
 	(user maxBudget ?UMax)
 	(restaurant ?X minBudget ?RMin)
@@ -20,6 +14,19 @@
 	(test (<= ?UMax ?RMax))
 	=>
 	(assert (grade-restaurant ?X budget)))
+
+(defrule grade-dresscode
+	(user dresscode ?Y)
+	(restaurant ?X dresscode ?Y)
+	=>
+	(assert (grade-restaurant ?X dresscode)))
+
+// If we don't need wifi, do we have to go to restaurant without wifi?
+(defrule grade-wifi
+	(user needWifi ?Y)
+	(restaurant ?X hasWifi ?Y)
+	=>
+	(assert (grade-restaurant ?X wifi)))
 
 (defrule populate-restaurant
 	?f <- (init restaurant)
@@ -60,7 +67,7 @@
 	=>
 	(retract ?f)
 	(assert 
-		(user smooking unknown)
+		(user smooking true)
 		(user minBudget 1300)
 		(user maxBudget 2250)
 		(user dresscode formal)
