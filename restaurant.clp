@@ -25,8 +25,25 @@
 		(restaurant C lng 106.8642591)
 	))
 
+// just dummy data, use stdin to populate this
+(defrule populate-user
+	(init user)
+	=>
+	(assert 
+		(user smooking true)
+		(user minBudget 1300)
+		(user maxBudget 2250)
+		(user dresscode formal)
+		(user needWifi false)
+		(user lat 0)
+		(user lng 0)
+	))
+
 (defrule init
 	(initial-fact)
 	=>
 	(printout t "Initializing program" crlf)
-	(assert (init restaurant)))
+	(assert
+		(init restaurant)
+		(init user)
+	))
