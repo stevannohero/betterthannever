@@ -36,6 +36,35 @@
 	=>
 	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))))
 
+(defrule update-score
+	?f <- (score ?X ?Y)
+	?g <- (grade-restaurant ?X ?Z)
+	=>
+	(retract ?f)
+	(retract ?g)
+	(assert (score ?X (+ ?Y 1))))
+
+(defrule update-recommendable-very-recommended
+	?f <- (restaurant ?X recommendable ~very-recommended)
+	(score ?X 4)
+	=>
+	(retract ?f)
+	(assert (restaurant ?X recommendable very-recommended)))
+
+(defrule update-recommendable-recommended
+	?f <- (restaurant ?X recommendable ~recommended)
+	(score ?X 2|3)
+	=>
+	(retract ?f)
+	(assert (restaurant ?X recommendable recommended)))
+
+(defrule update-recommendable-not-recommended
+	?f <- (restaurant ?X recommendable ~not-recommended)
+	(score ?X 0|1)
+	=>
+	(retract ?f)
+	(assert (restaurant ?X recommendable not-recommended)))
+
 (defrule populate-restaurant
 	?f <- (init restaurant)
 	=>
@@ -84,6 +113,15 @@
 		(user lng 0)
 	))
 
+(defrule populate-score-and-recommendable
+	(init score)
+	(restaurant ?X)
+	=>
+	(assert 
+		(score ?X 0)
+		(restaurant ?X recommendable not-recommended)
+	))
+
 (defrule init
 	?f <- (initial-fact)
 	=>
@@ -92,4 +130,5 @@
 	(assert
 		(init restaurant)
 		(init user)
+		(init score)
 	))
