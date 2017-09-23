@@ -103,15 +103,30 @@
 	?f <- (init user)
 	=>
 	(retract ?f)
-	(assert 
-		(user smooking true)
-		(user minBudget 1300)
-		(user maxBudget 2250)
-		(user dresscode formal)
-		(user needWifi false)
-		(user lat 0)
-		(user lng 0)
-	))
+	
+	(printout t "What is your name? ")
+	(assert (user name (read stdin)))
+
+	(printout t "Do you smoke?(true|false) ")
+	(assert (user smooking (read stdin)))
+
+	(printout t "What is your minimum budget?[0-9999] ")
+	(assert (user minBudget (read stdin)))
+
+	(printout t "What is your maximum budget?[0-9999] ")
+	(assert (user maxBudget (read stdin)))
+
+	(printout t "What clothes are you wearing?(casual|informal|formal) ")
+	(assert (user dresscode (read stdin)))
+
+	(printout t "Do you want restaurant with wifi?(true|false) ")
+	(assert (user needWifi (read stdin)))
+
+	(printout t "What are your lat. coordinate? ")
+	(assert (user lat (read stdin)))
+
+	(printout t "What are your long. coordinate? ")
+	(assert (user lng (read stdin))))
 
 (defrule populate-score-and-recommendable
 	(init score)
