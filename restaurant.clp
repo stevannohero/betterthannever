@@ -37,30 +37,30 @@
 	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))))
 
 (defrule update-score
-	?f <- (score ?X ?Y)
+	?f <- (score ?X ?Y ?A)
 	?g <- (grade-restaurant ?X ?Z)
 	=>
 	(retract ?f)
 	(retract ?g)
-	(assert (score ?X (+ ?Y 1))))
+	(assert (score ?X (+ ?Y 1) ?A)))
 
 (defrule update-recommendable-very-recommended
 	?f <- (restaurant ?X recommendable ~very-recommended)
-	(score ?X 4)
+	(score ?X 4 ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable very-recommended)))
 
 (defrule update-recommendable-recommended
 	?f <- (restaurant ?X recommendable ~recommended)
-	(score ?X 2|3)
+	(score ?X 2|3 ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable recommended)))
 
 (defrule update-recommendable-not-recommended
 	?f <- (restaurant ?X recommendable ~not-recommended)
-	(score ?X 0|1)
+	(score ?X 0|1 ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable not-recommended)))
@@ -70,7 +70,7 @@
 	=>
 	(retract ?f)
 	(assert
-		(restaurant A)
+		(restaurant A 1)
 		(restaurant A smooke true)
 		(restaurant A minBudget 1000)
 		(restaurant A maxBudget 2000)
@@ -79,7 +79,7 @@
 		(restaurant A lat -6.8922186)
 		(restaurant A lng 107.5886173)
 
-		(restaurant B)
+		(restaurant B 2)
 		(restaurant B smooke false)
 		(restaurant B minBudget 1200)
 		(restaurant B maxBudget 2500)
@@ -88,7 +88,7 @@
 		(restaurant B lat -6.224085)
 		(restaurant B lng 106.7859815)
 
-		(restaurant C)
+		(restaurant C 3)
 		(restaurant C smooke true)
 		(restaurant C minBudget 2000)
 		(restaurant C maxBudget 4000)
@@ -97,7 +97,7 @@
 		(restaurant C lat -6.2145285)
 		(restaurant C lng 106.8642591)
 		
-		(restaurant D)
+		(restaurant D 4)
 		(restaurant D smooke false)
 		(restaurant D minBudget 500)
 		(restaurant D maxBudget 1400)
@@ -106,7 +106,7 @@
 		(restaurant D lat -6.9005363)
 		(restaurant D lng 107.6222191)
 
-		(restaurant E)
+		(restaurant E 5)
 		(restaurant E smooke true)
 		(restaurant E minBudget 1000)
 		(restaurant E maxBudget 2000)
@@ -116,7 +116,7 @@
 		(restaurant E lat -6.2055617)
 		(restaurant E lng 106.8001597)
 
-		(restaurant F)
+		(restaurant F 6)
 		(restaurant F smooke false)
 		(restaurant F minBudget 2500)
 		(restaurant F maxBudget 5000)
@@ -125,7 +125,7 @@
 		(restaurant F lat -6.9045679)
 		(restaurant F lng 107.6399745)
 
-		(restaurant G)
+		(restaurant G 7)
 		(restaurant G smooke true)
 		(restaurant G minBudget 1300)
 		(restaurant G maxBudget 3000)
@@ -134,7 +134,7 @@
 		(restaurant G lat -6.1881082)
 		(restaurant G lng 106.7844409)
 
-		(restaurant H)
+		(restaurant H 8)
 		(restaurant H smooke false)
 		(restaurant H minBudget 400)
 		(restaurant H maxBudget 1000)
@@ -143,7 +143,7 @@
 		(restaurant H lat -6.9525133)
 		(restaurant H lng 107.605290)
 
-		(restaurant I)
+		(restaurant I 9)
 		(restaurant I smooke false)
 		(restaurant I minBudget 750)
 		(restaurant I maxBudget 2200)
@@ -153,7 +153,7 @@
 		(restaurant I lat -6.9586985)
 		(restaurant I lng 107.7092281)
 
-		(restaurant J)
+		(restaurant J 10)
 		(restaurant J smooke false)
 		(restaurant J minBudget 1500)
 		(restaurant J maxBudget 2000)
@@ -195,10 +195,10 @@
 
 (defrule populate-score-and-recommendable
 	(init score)
-	(restaurant ?X)
+	(restaurant ?X ?Y)
 	=>
 	(assert 
-		(score ?X 0)
+		(score ?X 0 ?Y)
 		(restaurant ?X recommendable not-recommended)
 	))
 
@@ -211,4 +211,17 @@
 		(init restaurant)
 		(init user)
 		(init score)
+	))
+
+(defrule sort
+	?f <- (score ?R1 ?S1 ?P1)
+	?g <- (score ?R2 ?S2 ?P2)
+	(test (>= ?S1 ?S2))
+	(test (>= ?P1 ?P2))
+	=>
+	(printout t "masuk")
+	(retract ?f ?g)
+	(assert
+		(score ?R1 ?S1 ?P2)
+		(score ?R2 ?S2 ?P1)
 	))
