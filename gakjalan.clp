@@ -34,12 +34,7 @@
 	(restaurant ?X lat ?RLat)
 	(restaurant ?X lng ?RLng)
 	=>
-	(if (and (neq ?ULat -) (neq ?ULng -))
-		then
-		(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2)))))
-		else
-		(assert (restaurant ?X distance NaN))
-	)
+	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2)))))
 )
 
 (defrule update-score
@@ -248,22 +243,45 @@
 		else
 		(if (eq ?S1 ?S2)
 			then
-			(if (eq ?j1 ?j2)
+			(if (< ?j1 ?j2)
 				then
-				(if (and (eq ?w1 true) (eq ?w2 false))
-					then
-					(retract ?F1 ?F2)
-					(assert 
-						(score ?N1 ?S1 ?P2)
-						(score ?N2 ?S2 ?P1))
-				)
+				(retract ?F1 ?F2)
+				(assert 
+					(score ?N1 ?S1 ?P2)
+					(score ?N2 ?S2 ?P1))
 				else
-				(if (< ?j1 ?j2)
+				(if (eq ?j1 ?j2)
 					then
-					(retract ?F1 ?F2)
-					(assert 
-						(score ?N1 ?S1 ?P2)
-						(score ?N2 ?S2 ?P1)
+					(if (and (eq ?w1 true) (eq ?w2 false))
+						then
+						(retract ?F1 ?F2)
+						(assert 
+							(score ?N1 ?S1 ?P2)
+							(score ?N2 ?S2 ?P1))
+						else					
+						(if (eq ?w1 ?w2)
+							then
+							(if (and (eq ?dc1 casual) (neq ?dc2 casua))
+								then
+								(retract ?F1 ?F2)
+								(assert 
+									(score ?N1 ?S1 ?P2)
+									(score ?N2 ?S2 ?P1)
+								)
+								else
+								(if (eq ?dc1 ?dc2)
+									then
+									(if (and (eq ?smoke1 false) (eq ?smoke2 false))
+										then
+										(retract ?F1 ?F2)
+										(assert 
+											(score ?N1 ?S1 ?P2)
+											(score ?N2 ?S2 ?P1)
+										)
+									)
+								)
+							) 
+						)
 					)
 				)				
 			)
