@@ -212,3 +212,7 @@
 		(init user)
 		(init score)
 	))
+
+(defrule print-result
+	=>
+	(printout t "Finished" crlf))
