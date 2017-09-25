@@ -10,8 +10,9 @@
 	(user maxBudget ?UMax)
 	(restaurant ?X minBudget ?RMin)
 	(restaurant ?X maxBudget ?RMax)
-	(test (>= ?UMin ?RMin))
-	(test (<= ?UMax ?RMax))
+	(test (>= ?UMax ?RMin))
+	// (test (>= ?UMin ?RMin))
+	// (test (<= ?UMax ?RMax))
 	=>
 	(assert (grade-restaurant ?X budget)))
 
@@ -34,7 +35,12 @@
 	(restaurant ?X lat ?RLat)
 	(restaurant ?X lng ?RLng)
 	=>
-	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))))
+	(if ~(eq (?ULat "-"))
+		then
+		(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))))
+		else
+		(assert (restaurant ?X distance 0))
+	)
 
 (defrule update-score
 	?f <- (score ?X ?Y ?A)
