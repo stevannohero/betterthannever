@@ -10,8 +10,9 @@
 	(user maxBudget ?UMax)
 	(restaurant ?X minBudget ?RMin)
 	(restaurant ?X maxBudget ?RMax)
-	(test (>= ?UMin ?RMin))
-	(test (<= ?UMax ?RMax))
+	(test (>= ?UMax ?RMin))
+	// (test (>= ?UMin ?RMin))
+	// (test (<= ?UMax ?RMax))
 	=>
 	(assert (grade-restaurant ?X budget)))
 
