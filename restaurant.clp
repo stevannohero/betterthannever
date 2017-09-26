@@ -221,6 +221,15 @@
 	))
 
 (defrule sort
+	(user name ?uname)
+	(user smooking ?usmoke)
+	(user minBudget ?uminb)
+	(user maxBudget ?umaxb)
+	(user dresscode ?udc)
+	(user needWifi ?uwifi)
+	(user lat ?ulat)
+	(user lng ?ulng)	
+
 	?F1 <- (score ?N1 ?S1 ?P1)
 	(restaurant ?N1 smooke ?smoke1)
 	(restaurant ?N1 minBudget ?minb1)
