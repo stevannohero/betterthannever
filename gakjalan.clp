@@ -261,7 +261,7 @@
 						else					
 						(if (eq ?w1 ?w2)
 							then
-							(if (and (eq ?dc1 casual) (neq ?dc2 casua))
+							(if (and (eq ?dc1 casual) (neq ?dc2 casual))
 								then
 								(retract ?F1 ?F2)
 								(assert 

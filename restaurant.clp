@@ -38,7 +38,7 @@
 		then
 		(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2)))))
 		else
-		(assert (restaurant ?X distance NaN))
+		(assert (restaurant ?X distance 0))
 	)
 )
 
@@ -248,22 +248,43 @@
 		else
 		(if (eq ?S1 ?S2)
 			then
-			(if (eq ?j1 ?j2)
+			(if (< ?j1 ?j2)
 				then
-				(if (and (eq ?w1 true) (eq ?w2 false))
-					then
-					(retract ?F1 ?F2)
-					(assert 
-						(score ?N1 ?S1 ?P2)
-						(score ?N2 ?S2 ?P1))
-				)
+				(retract ?F1 ?F2)
+				(assert 
+					(score ?N1 ?S1 ?P2)
+					(score ?N2 ?S2 ?P1))
 				else
-				(if (< ?j1 ?j2)
+				(if (eq ?j1 ?j2)
 					then
-					(retract ?F1 ?F2)
-					(assert 
-						(score ?N1 ?S1 ?P2)
-						(score ?N2 ?S2 ?P1)
+					(if (and (eq ?w1 true) (eq ?w2 false))
+						then
+						(retract ?F1 ?F2)
+						(assert 
+							(score ?N1 ?S1 ?P2)
+							(score ?N2 ?S2 ?P1))
+						else
+						(if (eq ?w1 ?w2)
+							then
+							(if (< ?minb1 ?minb2)
+								then
+								(retract ?F1 ?F2)
+								(assert
+									(score ?N1 ?S1 ?P2)
+									(score ?N2 ?S2 ?P1))
+								else
+								(if (= ?minb1 ?minb2)
+									then
+									(if (and (eq ?dc1 casual) (neq ?dc2 casual))
+										then 
+										(retract ?F1 ?F2)
+										(assert 
+											(score ?N1 ?S1 ?P2)
+											(score ?N2 ?S2 ?P1))
+									)
+								)
+							)
+						)
 					)
 				)				
 			)
