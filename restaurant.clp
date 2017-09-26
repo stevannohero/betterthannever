@@ -11,8 +11,6 @@
 	(restaurant ?X minBudget ?RMin)
 	(restaurant ?X maxBudget ?RMax)
 	(test (>= ?UMax ?RMin))
-	// (test (>= ?UMin ?RMin))
-	// (test (<= ?UMax ?RMax))
 	=>
 	(assert (grade-restaurant ?X budget)))
 
@@ -221,14 +219,8 @@
 	))
 
 (defrule sort
-	(user name ?uname)
 	(user smooking ?usmoke)
-	(user minBudget ?uminb)
-	(user maxBudget ?umaxb)
 	(user dresscode ?udc)
-	(user needWifi ?uwifi)
-	(user lat ?ulat)
-	(user lng ?ulng)	
 
 	?F1 <- (score ?N1 ?S1 ?P1)
 	(restaurant ?N1 smooke ?smoke1)
@@ -285,12 +277,45 @@
 								else
 								(if (= ?minb1 ?minb2)
 									then
-									(if (and (eq ?dc1 casual) (neq ?dc2 casual))
+									(if (and (eq ?dc1 ?udc) (neq ?dc2 ?udc))
 										then 
 										(retract ?F1 ?F2)
 										(assert 
 											(score ?N1 ?S1 ?P2)
 											(score ?N2 ?S2 ?P1))
+										else
+										(if (and (neq ?dc1 ?udc) (neq ?dc2 ?udc))
+											then
+											(if (and (eq ?dc1 casual) (neq ?dc2 casual))
+												then 
+												(retract ?F1 ?F2)
+												(assert 
+													(score ?N1 ?S1 ?P2)
+													(score ?N2 ?S2 ?P1))
+												else
+												(if (and (neq ?dc1 casual) (neq ?dc2 casual))
+													then
+													(if (and (eq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
+														then
+														(retract ?F1 ?F2)
+														(assert 
+															(score ?N1 ?S1 ?P2)
+															(score ?N1 ?S1 ?P1))
+														else
+														(if (and (neq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
+															then
+															(if (and (eq ?smoke1 false) (neq ?smoke2 false))
+																then
+																(retract ?F1 ?F2)
+																(assert 
+																	(score ?N1 ?S1 ?P2)
+																	(score ?N1 ?S1 ?P1))
+															)
+														)
+													)
+												)
+											)
+										)
 									)
 								)
 							)
