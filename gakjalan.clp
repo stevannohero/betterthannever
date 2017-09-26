@@ -10,7 +10,8 @@
 	(user maxBudget ?UMax)
 	(restaurant ?X minBudget ?RMin)
 	(restaurant ?X maxBudget ?RMax)
-	(test (>= ?UMax ?RMin))
+	(test (>= ?UMin ?RMin))
+	(test (<= ?UMax ?RMax))
 	=>
 	(assert (grade-restaurant ?X budget)))
 
@@ -33,12 +34,7 @@
 	(restaurant ?X lat ?RLat)
 	(restaurant ?X lng ?RLng)
 	=>
-	(if (and (neq ?ULat -) (neq ?ULng -))
-		then
-		(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2)))))
-		else
-		(assert (restaurant ?X distance 0))
-	)
+	(assert (restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2)))))
 )
 
 (defrule update-score
@@ -219,9 +215,6 @@
 	))
 
 (defrule sort
-	(user smooking ?usmoke)
-	(user dresscode ?udc)
-
 	?F1 <- (score ?N1 ?S1 ?P1)
 	(restaurant ?N1 smooke ?smoke1)
 	(restaurant ?N1 minBudget ?minb1)
@@ -265,60 +258,29 @@
 						(assert 
 							(score ?N1 ?S1 ?P2)
 							(score ?N2 ?S2 ?P1))
-						else
+						else					
 						(if (eq ?w1 ?w2)
 							then
-							(if (< ?minb1 ?minb2)
+							(if (and (eq ?dc1 casual) (neq ?dc2 casual))
 								then
 								(retract ?F1 ?F2)
-								(assert
+								(assert 
 									(score ?N1 ?S1 ?P2)
-									(score ?N2 ?S2 ?P1))
+									(score ?N2 ?S2 ?P1)
+								)
 								else
-								(if (= ?minb1 ?minb2)
+								(if (eq ?dc1 ?dc2)
 									then
-									(if (and (eq ?dc1 ?udc) (neq ?dc2 ?udc))
-										then 
+									(if (and (eq ?smoke1 false) (eq ?smoke2 false))
+										then
 										(retract ?F1 ?F2)
 										(assert 
 											(score ?N1 ?S1 ?P2)
-											(score ?N2 ?S2 ?P1))
-										else
-										(if (and (neq ?dc1 ?udc) (neq ?dc2 ?udc))
-											then
-											(if (and (eq ?dc1 casual) (neq ?dc2 casual))
-												then 
-												(retract ?F1 ?F2)
-												(assert 
-													(score ?N1 ?S1 ?P2)
-													(score ?N2 ?S2 ?P1))
-												else
-												(if (and (neq ?dc1 casual) (neq ?dc2 casual))
-													then
-													(if (and (eq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
-														then
-														(retract ?F1 ?F2)
-														(assert 
-															(score ?N1 ?S1 ?P2)
-															(score ?N1 ?S1 ?P1))
-														else
-														(if (and (neq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
-															then
-															(if (and (eq ?smoke1 false) (neq ?smoke2 false))
-																then
-																(retract ?F1 ?F2)
-																(assert 
-																	(score ?N1 ?S1 ?P2)
-																	(score ?N1 ?S1 ?P1))
-															)
-														)
-													)
-												)
-											)
+											(score ?N2 ?S2 ?P1)
 										)
 									)
 								)
-							)
+							) 
 						)
 					)
 				)				
