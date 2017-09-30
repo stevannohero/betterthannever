@@ -51,21 +51,28 @@
 
 (defrule update-recommendable-very-recommended
 	?f <- (restaurant ?X recommendable ~very-recommended)
-	(score ?X 4 ?A)
+	(criteria ?i)
+	(score ?X ?i ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable very-recommended)))
 
 (defrule update-recommendable-recommended
 	?f <- (restaurant ?X recommendable ~recommended)
-	(score ?X 2|3 ?A)
+	(criteria ?i)
+	?min1 <- (- ?i 1)
+	?min2 <- (- ?i 2)
+	(score ?X ?min1|?min2 ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable recommended)))
 
 (defrule update-recommendable-not-recommended
 	?f <- (restaurant ?X recommendable ~not-recommended)
-	(score ?X 0|1 ?A)
+	(criteria ?i)
+	?min3 <- (- ?i 3)
+	?min4 <- (- ?i 4)
+	(score ?X ?min3|?min4 ?A)
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable not-recommended)))
@@ -168,35 +175,98 @@
 		(restaurant J lng 107.775133)
 	))
 
+(defrule count-crit
+	?X <- (crit ?Y)
+	?Z <- (criteria ?A)
+	=>
+	(retract ?X ?Z)
+	(assert (criteria (+ ?A 1)))
+)
+
 // just dummy data, use stdin to populate this
 (defrule populate-user
 	?f <- (init user)
 	=>
 	(retract ?f)
-	
-	(printout t "What is your name? ")
-	(assert (user name (read stdin)))
 
-	(printout t "Do you smoke?(true|false) ")
-	(assert (user smooking (read stdin)))
+	(printout t "What is your name? ")
+	(bind ?inputname (read))
+	(assert (user name ?inputname))
+
+	(printout t "Do you smoke?(yes|no) ")
+	(bind ?inputsmoke (read))
+	(lowcase ?inputsmoke)
+	(if (or (eq ?inputsmoke yes) (eq ?inputsmoke no))
+		then
+		(assert (crit smoke))
+		(if (eq ?inputsmoke yes)
+			then 
+				(assert (user smooking true))
+			else
+				(assert (user smooking false))
+		)
+		else
+			(assert (user smooking -))
+	)
 
 	(printout t "What is your minimum budget?[0-9999] ")
-	(assert (user minBudget (read stdin)))
+	(bind ?inputmin (read))
 
 	(printout t "What is your maximum budget?[0-9999] ")
-	(assert (user maxBudget (read stdin)))
+	(bind ?inputmax (read))
+
+	(if (and (integerp ?inputmin) (integerp ?inputmax))
+		then
+			(assert (crit budget))
+			(assert (user minBudget ?inputmin))
+			(assert (user maxBudget ?inputmax))
+		else 
+			(assert (user minBudget 0))
+			(assert (user maxBudget 0))
+	)
 
 	(printout t "What clothes are you wearing?(casual|informal|formal) ")
-	(assert (user dresscode (read stdin)))
+	(bind ?inputdc (read))
+	(lowcase ?inputdc)
+	(if (or (or (eq ?inputdc informal) (eq ?inputdc formal)) (eq ?inputdc casual))
+		then
+			(assert (crit dresscode))
+			(assert (user dresscode ?inputdc))
+		else
+			(assert (user dresscode -))
+	)
 
-	(printout t "Do you want restaurant with wifi?(true|false) ")
-	(assert (user needWifi (read stdin)))
+	(printout t "Do you want restaurant with wifi?(yes|no) ")
+	(bind ?inputwifi (read))
+	(lowcase ?inputwifi)
+	(if (or (eq ?inputwifi yes) (eq ?inputwifi no))
+		then
+		(assert (crit needWifi))
+		(if (eq ?inputwifi yes)
+			then 
+				(assert (user needWifi true))
+			else
+				(assert (user needWifi false))
+		)
+		else
+			(assert (user needWifi -))
+	)
 
 	(printout t "What are your lat. coordinate? ")
-	(assert (user lat (read stdin)))
+	(bind ?inputlat (read))
 
 	(printout t "What are your long. coordinate? ")
-	(assert (user lng (read stdin))))
+	(bind ?inputlon (read))
+
+	(if (or (and (integerp ?inputlon) (integerp ?inputlat)) (and (floatp ?inputlon) (floatp ?inputlat)))
+		then	
+			(assert (user lat ?inputlat))	
+			(assert (user lng ?inputlon))
+		else 
+			(assert (user lat -))	
+			(assert (user lng -))
+	)	
+)
 
 (defrule populate-score-and-recommendable
 	(init score)
@@ -214,6 +284,7 @@
 	(printout t "Initializing program" crlf)
 	(assert
 		(init restaurant)
+		(criteria 0)
 		(init user)
 		(init score)
 	))
