@@ -60,9 +60,8 @@
 (defrule update-recommendable-recommended
 	?f <- (restaurant ?X recommendable ~recommended)
 	(criteria ?i)
-	?min1 <- (- ?i 1)
-	?min2 <- (- ?i 2)
-	(score ?X ?min1|?min2 ?A)
+	(score ?X ?t ?A)
+	(test (or (eq ?t (- ?i 1)) (eq ?t (- ?i 2))))
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable recommended)))
@@ -70,9 +69,8 @@
 (defrule update-recommendable-not-recommended
 	?f <- (restaurant ?X recommendable ~not-recommended)
 	(criteria ?i)
-	?min3 <- (- ?i 3)
-	?min4 <- (- ?i 4)
-	(score ?X ?min3|?min4 ?A)
+	(score ?X ?t ?A)
+	(test (or (eq ?t (- ?i 3)) (eq ?t (- ?i 4))))
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable not-recommended)))
