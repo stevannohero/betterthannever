@@ -225,21 +225,12 @@
 	(retract ?f)
 	(assert (restaurant ?X recommendable not-recommended)))
 
-
-(defrule count-crit
-	?X <- (crit ?Y)
-	?Z <- (criteria ?A)
-	=>
-	(retract ?X ?Z)
-	(assert (criteria (+ ?A 1)))
-)
-
 // just dummy data, use stdin to populate this
 (defrule populate-user
 	?f <- (init user)
+	?g <- (criteria ?count)
 	=>
 	(retract ?f)
-
 	(printout t "What is your name? ")
 	(bind ?inputname (read))
 	(assert (user name ?inputname))
@@ -249,7 +240,8 @@
 	(lowcase ?inputsmoke)
 	(if (or (eq ?inputsmoke yes) (eq ?inputsmoke no))
 		then
-		(assert (crit smoke))
+		(retract ?g)
+		(assert (criteria (+ ?count 1)))
 		(if (eq ?inputsmoke yes)
 			then 
 				(assert (user smoking true))
@@ -268,7 +260,8 @@
 
 	(if (and (integerp ?inputmin) (integerp ?inputmax))
 		then
-			(assert (crit budget))
+			(retract ?g)
+			(assert (criteria (+ ?count 1)))
 			(assert (user minBudget ?inputmin))
 			(assert (user maxBudget ?inputmax))
 		else 
@@ -281,7 +274,8 @@
 	(lowcase ?inputdc)
 	(if (or (or (eq ?inputdc informal) (eq ?inputdc formal)) (eq ?inputdc casual))
 		then
-			(assert (crit dresscode))
+			(retract ?g)
+			(assert (criteria (+ ?count 1)))
 			(assert (user dresscode ?inputdc))
 		else
 			(assert (user dresscode -))
@@ -292,7 +286,8 @@
 	(lowcase ?inputwifi)
 	(if (or (eq ?inputwifi yes) (eq ?inputwifi no))
 		then
-		(assert (crit needWifi))
+		(retract ?g)
+		(assert (criteria (+ ?count 1)))
 		(if (eq ?inputwifi yes)
 			then 
 				(assert (user needWifi true))
