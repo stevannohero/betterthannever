@@ -10,6 +10,11 @@
 	(slot lng (type NUMBER))
 )
 
+(deftemplate score-data
+	(slot name)
+	(slot score (type NUMBER))
+	(slot rank (type NUMBER))
+)
 (deffacts populate-restaurant
 	(restaurant-data 
 		(name A)
@@ -135,7 +140,7 @@
 	(restaurant-data (name ?X) (number ?Y))
 	=>
 	(assert 
-		(score ?X 0 ?Y)
+		(score-data (name ?X) (score 0) (rank ?Y))
 		(restaurant ?X recommendable not-recommended)
 	))
 
@@ -156,7 +161,7 @@
 )
 (defrule grade-dresscode
 	(user dresscode ?Y)
-	(restaurant-data (name ?X) (dresscode ?Y))
+	(restaurant-data (name ?X) (dresscode $? ?Y $?))
 	=>
 	(assert (grade-restaurant ?X dresscode))
 )
@@ -186,17 +191,18 @@
 
 // update score
 (defrule update-score
-	?f <- (score ?X ?Y ?A)
+	?f <- (score-data (name ?X) (score ?Y))
 	?g <- (grade-restaurant ?X ?Z)
 	=>
-	(retract ?f)
 	(retract ?g)
-	(assert (score ?X (+ ?Y 1) ?A)))
+	(bind ?v (+ ?Y 1))
+	(modify ?f (score ?v))
+	)
 
 (defrule update-recommendable-very-recommended
 	?f <- (restaurant ?X recommendable ~very-recommended)
 	(criteria ?i)
-	(score ?X ?i ?A)
+	(score-data (name ?X) (score ?i) (rank ?A))
 	=>
 	(retract ?f)
 	(assert (restaurant ?X recommendable very-recommended)))
@@ -204,7 +210,7 @@
 (defrule update-recommendable-recommended
 	?f <- (restaurant ?X recommendable ~recommended)
 	(criteria ?i)
-	(score ?X ?t ?A)
+	(score-data (name ?X) (score ?t))
 	(test (or (eq ?t (- ?i 1)) (eq ?t (- ?i 2))))
 	=>
 	(retract ?f)
@@ -213,7 +219,7 @@
 (defrule update-recommendable-not-recommended
 	?f <- (restaurant ?X recommendable ~not-recommended)
 	(criteria ?i)
-	(score ?X ?t ?A)
+	(score-data (name ?X) (score ?t))
 	(test (or (eq ?t (- ?i 3)) (eq ?t (- ?i 4))))
 	=>
 	(retract ?f)
@@ -313,15 +319,6 @@
 	)	
 )
 
-(defrule populate-score-and-recommendable
-	(init score)
-	(restaurant-data (name ?X) (number ?Y))
-	=>
-	(assert 
-		(score ?X 0 ?Y)
-		(restaurant ?X recommendable not-recommended)
-	))
-
 (defrule init
 	?f <- (initial-fact)
 	=>
@@ -339,86 +336,69 @@
 	(user smoking ?usmoke)
 	(user dresscode ?udc)
 
-	?F1 <- (score ?N1 ?S1 ?P1)
-	(restaurant-data (name ?N1) (smoke ?smoke1) (minBudget ?minb1) (maxBudget ?maxb1) (dresscode ?dc1) (hasWifi ?w1))
+	?F1 <- (score-data (name ?N1) (score ?S1) (rank ?P1))
+	(restaurant-data (name ?N1) (smoke ?smoke1) (minBudget ?minb1) (maxBudget ?maxb1) (dresscode $? ?dc1 $?) (hasWifi ?w1))
 	(restaurant ?N1 distance ?j1)
 	
-	?F2 <- (score ?N2 ?S2 ?P2)
-	(restaurant-data (name ?N2) (smoke ?smoke2) (minBudget ?minb2) (maxBudget ?maxb2) (dresscode ?dc2) (hasWifi ?w2))
+	?F2 <- (score-data (name ?N2) (score ?S2) (rank ?P2))
+	(restaurant-data (name ?N2) (smoke ?smoke2) (minBudget ?minb2) (maxBudget ?maxb2) (dresscode $? ?dc2 $?) (hasWifi ?w2))
 	(restaurant ?N2 distance ?j2)
 	
 	(test (> ?P1 ?P2))
 	=>
 	(if (> ?S1 ?S2)
 		then 
-		(retract ?F1 ?F2)
-		(assert 
-			(score ?N1 ?S1 ?P2)
-			(score ?N2 ?S2 ?P1))
-
+		(modify ?F1 (score ?S1) (rank ?P2))
+		(modify ?F2 (score ?S2) (rank ?P1))
 		else
 		(if (eq ?S1 ?S2)
 			then
 			(if (< ?j1 ?j2)
 				then
-				(retract ?F1 ?F2)
-				(assert 
-					(score ?N1 ?S1 ?P2)
-					(score ?N2 ?S2 ?P1))
+				(modify ?F1 (score ?S1) (rank ?P2))
+				(modify ?F2 (score ?S2) (rank ?P1))
 				else
 				(if (eq ?j1 ?j2)
 					then
 					(if (and (eq ?w1 true) (eq ?w2 false))
 						then
-						(retract ?F1 ?F2)
-						(assert 
-							(score ?N1 ?S1 ?P2)
-							(score ?N2 ?S2 ?P1))
+						(modify ?F1 (score ?S1) (rank ?P2))
+						(modify ?F2 (score ?S2) (rank ?P1))
 						else
 						(if (eq ?w1 ?w2)
 							then
 							(if (< ?minb1 ?minb2)
 								then
-								(retract ?F1 ?F2)
-								(assert
-									(score ?N1 ?S1 ?P2)
-									(score ?N2 ?S2 ?P1))
+								(modify ?F1 (score ?S1) (rank ?P2))
+								(modify ?F2 (score ?S2) (rank ?P1))
 								else
 								(if (= ?minb1 ?minb2)
 									then
 									(if (and (eq ?dc1 ?udc) (neq ?dc2 ?udc))
 										then 
-										(retract ?F1 ?F2)
-										(assert 
-											(score ?N1 ?S1 ?P2)
-											(score ?N2 ?S2 ?P1))
+										(modify ?F1 (score ?S1) (rank ?P2))
+										(modify ?F2 (score ?S2) (rank ?P1))
 										else
 										(if (and (neq ?dc1 ?udc) (neq ?dc2 ?udc))
 											then
 											(if (and (eq ?dc1 casual) (neq ?dc2 casual))
 												then 
-												(retract ?F1 ?F2)
-												(assert 
-													(score ?N1 ?S1 ?P2)
-													(score ?N2 ?S2 ?P1))
+												(modify ?F1 (score ?S1) (rank ?P2))
+												(modify ?F2 (score ?S2) (rank ?P1))
 												else
 												(if (and (neq ?dc1 casual) (neq ?dc2 casual))
 													then
 													(if (and (eq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
 														then
-														(retract ?F1 ?F2)
-														(assert 
-															(score ?N1 ?S1 ?P2)
-															(score ?N1 ?S1 ?P1))
+														(modify ?F1 (score ?S1) (rank ?P2))
+														(modify ?F2 (score ?S2) (rank ?P1))
 														else
 														(if (and (neq ?smoke1 ?usmoke) (neq ?smoke2 ?usmoke))
 															then
 															(if (and (eq ?smoke1 false) (neq ?smoke2 false))
 																then
-																(retract ?F1 ?F2)
-																(assert 
-																	(score ?N1 ?S1 ?P2)
-																	(score ?N1 ?S1 ?P1))
+																(modify ?F1 (score ?S1) (rank ?P2))
+																(modify ?F2 (score ?S2) (rank ?P1))
 															)
 														)
 													)
@@ -446,9 +426,9 @@
 
 (defrule print-result
 	(print-result)
-	?f1 <- (score ?X1 ?Y1 1)
-	?f2 <- (score ?X2 ?Y2 2)
-	?f3 <- (score ?X3 ?Y3 3)
+	?f1 <- (score-data (name ?X1) (score ?Y1) (rank 1))
+	?f2 <- (score-data (name ?X2) (score ?Y2) (rank 2))
+	?f3 <- (score-data (name ?X3) (score ?Y3) (rank 3))
 	(restaurant ?X1 recommendable ?Z1)
 	(restaurant ?X2 recommendable ?Z2)
 	(restaurant ?X3 recommendable ?Z3)
