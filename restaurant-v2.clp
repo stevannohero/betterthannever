@@ -8,7 +8,6 @@
 	(slot hasWifi)
 	(slot lat (type NUMBER))
 	(slot lng (type NUMBER))
-	(slot distance (type NUMBER))
 )
 
 (deffacts populate-restaurant
@@ -173,15 +172,15 @@
 (defrule count-distance
 	(user lat ?ULat)
 	(user lng ?ULng)
-	?F1 <- (restaurant-data (name ?X) (lat ?RLat) (lng ?RLng))
+	(restaurant-data (name ?X) (lat ?RLat) (lng ?RLng))
 	=>
 	(if (and (neq ?ULat -) (neq ?ULng -))
 		then
-		(modify
-			?F1 (distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))
+		(assert
+			(restaurant ?X distance (sqrt (+ (** (abs (- ?ULat ?RLat)) 2) (** (abs (- ?ULng ?RLng)) 2))))
 		)
 		else
-		(modify ?F1 (distance 0))
+		(assert (restaurant ?X distance 0))
 	)
 )
 
@@ -341,14 +340,15 @@
 	(user dresscode ?udc)
 
 	?F1 <- (score ?N1 ?S1 ?P1)
-	(restaurant-data (name ?N1) (smoke ?smoke1) (minBudget ?minb1) (maxBudget ?maxb1) (dresscode ?dc1) (hasWifi ?w1) (distance ?j1))
+	(restaurant-data (name ?N1) (smoke ?smoke1) (minBudget ?minb1) (maxBudget ?maxb1) (dresscode ?dc1) (hasWifi ?w1))
+	(restaurant ?N1 distance ?j1)
 	
 	?F2 <- (score ?N2 ?S2 ?P2)
-	(restaurant-data (name ?N2) (smoke ?smoke2) (minBudget ?minb2) (maxBudget ?maxb2) (dresscode ?dc2) (hasWifi ?w2) (distance ?j2))
+	(restaurant-data (name ?N2) (smoke ?smoke2) (minBudget ?minb2) (maxBudget ?maxb2) (dresscode ?dc2) (hasWifi ?w2))
+	(restaurant ?N2 distance ?j2)
 	
 	(test (> ?P1 ?P2))
 	=>
-	(printout t "sort" crlf)
 	(if (> ?S1 ?S2)
 		then 
 		(retract ?F1 ?F2)
@@ -441,7 +441,6 @@
 	?f1 <- (finish)
 	=>
 	(retract ?f1)
-	(printout t "sort finish" crlf)
 	(assert (print-result))
 	)
 
@@ -453,9 +452,12 @@
 	(restaurant ?X1 recommendable ?Z1)
 	(restaurant ?X2 recommendable ?Z2)
 	(restaurant ?X3 recommendable ?Z3)
+	(restaurant ?X1 distance ?D1)
+	(restaurant ?X2 distance ?D2)
+	(restaurant ?X3 distance ?D3)
 	=>
-	(format t "Here is your")
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X1 ?Z1 ?Y1)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X2 ?Z2 ?Y2)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X3 ?Z3 ?Y3)
+	(format t "%nHere’s our recommendation:%n")
+	(format t "Restaurant %-2s : %-12s (distance: %f)%n" ?X1 ?Z1 ?D1)
+	(format t "Restaurant %-2s : %-12s (distance: %f)%n" ?X2 ?Z2 ?D2)
+	(format t "Restaurant %-2s : %-12s (distance: %f)%n" ?X3 ?Z3 ?D3)
 	)
