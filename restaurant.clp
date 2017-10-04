@@ -281,6 +281,7 @@
 	(retract ?f)
 	(printout t "Initializing program" crlf)
 	(assert
+		(finish)
 		(init restaurant)
 		(criteria 0)
 		(init user)
@@ -396,44 +397,26 @@
 	)	
 )
 
+
+(defrule check-sort-finish
+	?f1 <- (finish)
+	=>
+	(retract ?f1)
+	(printout t "sort finish" crlf)
+	(assert (print-result))
+	)
+
 (defrule print-result
-	(finish)
+	(print-result)
 	?f1 <- (score ?X1 ?Y1 1)
 	?f2 <- (score ?X2 ?Y2 2)
-	?f3 <- (score ?X3 ?Y3 3)
-	?f4 <- (score ?X4 ?Y4 4)
-	?f5 <- (score ?X5 ?Y5 5)
-	?f6 <- (score ?X6 ?Y6 6)
-	?f7 <- (score ?X7 ?Y7 7)
-	?f8 <- (score ?X8 ?Y8 8)
-	?f9 <- (score ?X9 ?Y9 9)
-	?f10 <- (score ?X10 ?Y10 10)
+	?f3 <- (score ?X3 ?Y3 3)]
 	(restaurant ?X1 recommendable ?Z1)
 	(restaurant ?X2 recommendable ?Z2)
 	(restaurant ?X3 recommendable ?Z3)
-	(restaurant ?X4 recommendable ?Z4)
-	(restaurant ?X5 recommendable ?Z5)
-	(restaurant ?X6 recommendable ?Z6)
-	(restaurant ?X7 recommendable ?Z7)
-	(restaurant ?X8 recommendable ?Z8)
-	(restaurant ?X9 recommendable ?Z9)
-	(restaurant ?X10 recommendable ?Z10)
 	=>
+	(format t "Here is your")
 	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X1 ?Z1 ?Y1)
 	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X2 ?Z2 ?Y2)
 	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X3 ?Z3 ?Y3)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X4 ?Z4 ?Y4)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X5 ?Z5 ?Y5)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X6 ?Z6 ?Y6)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X7 ?Z7 ?Y7)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X8 ?Z8 ?Y8)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X9 ?Z9 ?Y9)
-	(format t "Restaurant %-2s : %-12s | %-3d%n" ?X10 ?Z10 ?Y10)
 	)
-
-(defrule finish
-	=>
-	(printout t "Finish" crlf)
-	(assert
-		(finish)
-	))
